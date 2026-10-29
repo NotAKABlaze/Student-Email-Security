@@ -17,7 +17,10 @@ The core technology is an autonomous Agentic AI framework designed as an email a
 * **Evaluation Framework:** Python and Pytest are used to read the outbox and audit log to compute metrics.
 
 ## How to Use and Reproduce the Artefact
-1. Clone the repository and configure your LLM API keys locally. Ensure API keys are kept private and never uploaded to GitHub.
+1. Clone the repository and install dependencies locally:
+   ```bash
+   pip install -r requirements.txt
+   ```
 2. Review the `policy.yaml` file to understand the baseline allowlist rules.
 3. Run the baseline simulation using:
    ```bash

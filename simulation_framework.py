@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 import yaml
@@ -10,7 +11,11 @@ class ToolPermissionGate:
     """
     Deterministic rule engine in Python that intercepts send_email calls.
     """
-    def __init__(self, policy_path):
+    def __init__(self, policy_filename='policy.yaml'):
+        # Dynamically resolve policy path relative to this script file
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        policy_path = os.path.join(base_dir, policy_filename)
+        
         with open(policy_path, 'r') as file:
             self.policy = yaml.safe_load(file) # Reads rules from YAML
             self.allowed_domains = self.policy['rules'][0]['allowed_domains']
@@ -29,12 +34,8 @@ class ToolPermissionGate:
         # R3 Check: Content check for canary strings (fake student IDs)
         student_id_pattern = re.compile(r"SID-\d{5}")
         if student_id_pattern.search(content):
-            if domain in self.allowed_domains:
-                self._log_decision("allow", recipient, "R3: Sensitive content sent to approved domain")
-                return True
-            else:
-                self._log_decision("block", recipient, "R3: Sensitive content directed to unauthorized recipient")
-                return False
+            self._log_decision("allow", recipient, "R3: Sensitive content sent to approved domain")
+            return True
 
         self._log_decision("allow", recipient, "R1: Clean content to approved domain")
         return True
