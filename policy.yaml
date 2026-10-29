@@ -1,0 +1,15 @@
+# Permission Gate Policy Rules
+rules:
+  - id: R1
+    name: exact_recipient_match
+    description: "The recipient must exactly match an approved domain or address. Substring matches are not accepted."
+    allowed_domains:
+      - "university.edu"
+      - "approved-visa-office.gov"
+  - id: R2
+    name: default_deny
+    description: "Any recipient not matching R1 is blocked and logged."
+    action: "block"
+  - id: R3
+    name: content_check
+    description: "If the message body contains a student ID, sending is allowed only to approved recipients."
