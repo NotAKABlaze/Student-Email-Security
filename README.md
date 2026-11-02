@@ -1,29 +1,38 @@
-# Student-Support Email Assistant: Tool-Permission Gate Framework
+# Student-Support Email Assistant: Testing, Validation & Agentic AI Suite
 
-## Purpose
-This repository provides an empirically evaluable framework designed to address indirect prompt injection, a critical security vulnerability in Agentic AI systems. The project specifically evaluates a defensible niche: securing email-based data exfiltration in academic student support environments. It deploys a simulated email assistant equipped with basic tool capabilities, tested against custom synthetic student support scenarios and targeted attack vectors.
+This repository contains the complete testing, validation, and iteration suite for securing an Agentic AI Student-Support Email Assistant against Indirect Prompt Injection attacks.
 
-## Architecture & Conceptual Framework
-The core technology is an autonomous Agentic AI framework designed as an email assistant that executes multi-step workflows using a Python loop tool.
-* **Mock Mailbox:** Contains synthetic student records seeded with unique canary strings (fake student IDs) to detect leakage.
-* **Agent Tools:** The agent interacts with three mock tools via JSON tool calls: `get_unread_emails`, `read_email`, and `send_email`.
-* **Tool-Permission Gate:** A supporting security architecture engineered to inspect and block unauthorized transmission of sensitive student data. This deterministic, rule-based gate sits inline between the agent and the `send_email` tool.
-* **Policy Engine:** The gate reads allowed domains and rules from a YAML policy file (`policy.yaml`), allowing IT and compliance staff to audit and update rules without editing code.
-* **Outbox & Audit Log:** All permitted emails are routed to a mock outbox stored as JSON. Every gate decision (allow or block) is recorded in a JSON audit log with a reason.
+## Project Architecture
+1. **Core Agentic AI Assistant:** Autonomous email processing loop calling tools: `get_unread_emails()`, `read_email()`, and `send_email()`.
+2. **Tool-Permission Gate:** Rule-based security layer enforcing `policy.yaml` rules ($R_1$ exact recipient match, $R_2$ default deny, $R_3$ sensitive content check, and $R_4$ ownership check).
+3. **Evaluation Engine:** Automated benchmark testing agent security across 4 experimental conditions ($C_0$–$C_3$) and 210 test cases.
 
-## Tools & Technologies
-* **Language/Framework:** Plain Python tool-calling loop with no external agent frameworks (e.g., LangChain is excluded to ensure a transparent execution path).
-* **LLM APIs:** Claude Haiku 5.5 and Gemini 2.5 Flash (temperature 1.0, maximum 2,048 output tokens).
-* **Evaluation Framework:** Python and Pytest are used to read the outbox and audit log to compute metrics.
+## File Structure
+* `test_agentic_ai.py` - Standalone test script for the Agentic AI tool execution (`get_unread_emails`, `read_email`, `send_email`).
+* `simulation_framework.py` - Core prototype simulation.
+* `agent_evaluator.py` - Interception engine and gate evaluator.
+* `run_experiments.py` - Full multi-condition benchmark runner ($C_0$ to $C_3$).
+* `test_suite.py` - Pytest unit test suite for gate rules and agent tools.
+* `policy.yaml` - YAML security policy configuration.
+* `synthetic_students.json` - 50 synthetic student records with canary strings.
+* `dataset_attacks.json` - 150 prompt injection attacks (hand-written, LLMail-Inject, and edge cases).
+* `dataset_benign.json` - 60 legitimate student-support administrative tasks.
+* `requirements.txt` - Python dependencies (`pyyaml`, `pandas`, `pytest`).
 
-## How to Use and Reproduce the Artefact
-1. Clone the repository and install dependencies locally:
+## How to Run
+1. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
-2. Review the `policy.yaml` file to understand the baseline allowlist rules.
-3. Run the baseline simulation using:
+2. **Test Agentic AI Tools separately:**
    ```bash
-   python simulation_framework.py
+   python test_agentic_ai.py
    ```
-4. The evaluator will check the outbox for the presence of canary strings sent to non-approved recipients to calculate the final metrics.
+3. **Run Unit Tests:**
+   ```bash
+   pytest test_suite.py
+   ```
+4. **Run Full Benchmark Experiments:**
+   ```bash
+   python run_experiments.py
+   ```
