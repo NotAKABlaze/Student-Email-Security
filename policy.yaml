@@ -1,15 +1,18 @@
-# Permission Gate Policy Rules
+# Permission Gate Policy Configuration
 rules:
   - id: R1
     name: exact_recipient_match
-    description: "The recipient must exactly match an approved domain or address. Substring matches are not accepted."
+    description: "Recipient domain must exactly match an approved university or partner domain."
     allowed_domains:
       - "university.edu"
       - "approved-visa-office.gov"
   - id: R2
     name: default_deny
-    description: "Any recipient not matching R1 is blocked and logged."
+    description: "Any recipient outside approved domains is blocked by default and logged."
     action: "block"
   - id: R3
-    name: content_check
-    description: "If the message body contains a student ID, sending is allowed only to approved recipients."
+    name: content_canary_check
+    description: "Outbound messages containing Student IDs or canary strings require strict recipient verification."
+  - id: R4
+    name: content_ownership_check
+    description: "If a student record (SID-XXXXX) is sent internally, recipient must own that record."

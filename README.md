@@ -1,38 +1,31 @@
-# Student-Support Email Assistant: Testing, Validation & Agentic AI Suite
+# Student-Support Email Assistant: Action-Layer Permission Gate
 
-This repository contains the complete testing, validation, and iteration suite for securing an Agentic AI Student-Support Email Assistant against Indirect Prompt Injection attacks.
-
-## Project Architecture
-1. **Core Agentic AI Assistant:** Autonomous email processing loop calling tools: `get_unread_emails()`, `read_email()`, and `send_email()`.
-2. **Tool-Permission Gate:** Rule-based security layer enforcing `policy.yaml` rules ($R_1$ exact recipient match, $R_2$ default deny, $R_3$ sensitive content check, and $R_4$ ownership check).
-3. **Evaluation Engine:** Automated benchmark testing agent security across 4 experimental conditions ($C_0$–$C_3$) and 210 test cases.
-
-## File Structure
-* `test_agentic_ai.py` - Standalone test script for the Agentic AI tool execution (`get_unread_emails`, `read_email`, `send_email`).
-* `simulation_framework.py` - Core prototype simulation.
-* `agent_evaluator.py` - Interception engine and gate evaluator.
-* `run_experiments.py` - Full multi-condition benchmark runner ($C_0$ to $C_3$).
-* `test_suite.py` - Pytest unit test suite for gate rules and agent tools.
-* `policy.yaml` - YAML security policy configuration.
-* `synthetic_students.json` - 50 synthetic student records with canary strings.
-* `dataset_attacks.json` - 150 prompt injection attacks (hand-written, LLMail-Inject, and edge cases).
-* `dataset_benign.json` - 60 legitimate student-support administrative tasks.
-* `requirements.txt` - Python dependencies (`pyyaml`, `pandas`, `pytest`).
+An Agentic AI Student-Support Email Assistant protected by a deterministic, YAML-configured **Tool-Permission Gate** evaluated against the public **Microsoft LLMail-Inject** dataset (`microsoft/llmail-inject-challenge`, EMNLP 2026).
 
 ## How to Run
-1. **Install dependencies:**
+
+1. **Install Dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
-2. **Test Agentic AI Tools separately:**
+
+2. **Download Official Public Attack Dataset (Microsoft LLMail-Inject):**
+   ```bash
+   python fetch_public_dataset.py
+   ```
+   *(Downloads 100 real, unmodified indirect prompt injection submissions via `seed=42` plus 10 university intra-domain edge cases into `dataset_attacks.json`.)*
+
+3. **Test Agentic AI Tools Standalone (`get_unread_emails`, `read_email`, `send_email`):**
    ```bash
    python test_agentic_ai.py
    ```
-3. **Run Unit Tests:**
+
+4. **Run Automated Unit Tests:**
    ```bash
    pytest test_suite.py
    ```
-4. **Run Full Benchmark Experiments:**
+
+5. **Run Full Experimental Benchmark ($C_0$–$C_3$):**
    ```bash
    python run_experiments.py
    ```
