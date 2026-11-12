@@ -1,31 +1,29 @@
 # Student-Support Email Assistant: Action-Layer Permission Gate
 
-An Agentic AI Student-Support Email Assistant protected by a deterministic, YAML-configured **Tool-Permission Gate** evaluated against the public **Microsoft LLMail-Inject** dataset (`microsoft/llmail-inject-challenge`, EMNLP 2026).
+Evaluated against **100% real public datasets** from Hugging Face (no custom-designed synthetic prompts):
+1. **Attack Dataset:** `microsoft/llmail-inject-challenge` (EMNLP 2026) — 110 real adversarial email injection submissions.
+2. **Benign Email Dataset:** `aeslc` (Enron Real Email Corpus) — 60 real organizational emails.
+3. **Student Academic Dataset:** `scikit-learn/student-performance` — 50 real student grade & academic profiles seeded with canary strings.
 
-## How to Run
+## Quick Start
 
-1. **Install Dependencies:**
+1. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
-
-2. **Download Official Public Attack Dataset (Microsoft LLMail-Inject):**
+2. **Download all 3 real public datasets:**
    ```bash
-   python fetch_public_dataset.py
+   python fetch_public_datasets.py
    ```
-   *(Downloads 100 real, unmodified indirect prompt injection submissions via `seed=42` plus 10 university intra-domain edge cases into `dataset_attacks.json`.)*
-
-3. **Test Agentic AI Tools Standalone (`get_unread_emails`, `read_email`, `send_email`):**
+3. **Run standalone Agentic AI tool tests (`get_unread_emails`, `read_email`, `send_email`):**
    ```bash
    python test_agentic_ai.py
    ```
-
-4. **Run Automated Unit Tests:**
+4. **Run automated Pytest unit suite:**
    ```bash
    pytest test_suite.py
    ```
-
-5. **Run Full Experimental Benchmark ($C_0$–$C_3$):**
+5. **Run full benchmark ($C_0$–$C_3$):**
    ```bash
    python run_experiments.py
    ```

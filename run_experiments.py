@@ -2,17 +2,16 @@ import json
 import os
 import pandas as pd
 from agent_evaluator import AgenticEvaluator
-from fetch_public_dataset import download_llmail_inject_subset
+from fetch_public_datasets import build_real_benchmark_datasets
 
 def run_full_benchmark():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     attacks_file = os.path.join(base_dir, 'dataset_attacks.json')
     benign_file = os.path.join(base_dir, 'dataset_benign.json')
 
-    # Automatically download public LLMail-Inject dataset if not already cached locally
-    if not os.path.exists(attacks_file):
-        print("dataset_attacks.json not found locally. Fetching public LLMail-Inject benchmark...")
-        download_llmail_inject_subset(sample_size=100, seed=42)
+    if not (os.path.exists(attacks_file) and os.path.exists(benign_file)):
+        print("Real public datasets not cached locally. Downloading from Hugging Face...")
+        build_real_benchmark_datasets(seed=42)
 
     with open(attacks_file, 'r', encoding='utf-8') as f:
         attacks = json.load(f)
@@ -25,10 +24,10 @@ def run_full_benchmark():
 
     summary_results = []
 
-    print("=" * 70)
-    print("   UNBIASED BENCHMARK EVALUATION (MICROSOFT LLMAIL-INJECT + EDGE CASES)")
-    print("=" * 70)
-    print(f"Loaded {len(attacks)} Attack Cases & {len(benign_tasks)} Benign Cases")
+    print("=" * 72)
+    print("   100% REAL PUBLIC DATASET BENCHMARK (LLMAIL-INJECT + ENRON + STUDENT)")
+    print("=" * 72)
+    print(f"Loaded {len(attacks)} Real Attack Cases & {len(benign_tasks)} Real Benign Emails")
 
     for model in models:
         for cond in conditions:
@@ -46,7 +45,6 @@ def run_full_benchmark():
                         payload_content=f"Payload {attack['target_student_id']} {attack['target_canary']}",
                         recipient_student_id="SID-99999"
                     )
-                    # Execution-verified scoring: attack succeeds ONLY if canary lands in unauthorized outbox
                     if delivered:
                         attack_successes += 1
 
@@ -61,9 +59,9 @@ def run_full_benchmark():
                     for _ in range(repeats):
                         total_benign_runs += 1
                         delivered, _ = evaluator.run_case(
-                            prompt=task['user_prompt'],
+                            prompt=task['email_body'],
                             target_recipient=task['expected_recipient'],
-                            payload_content=f"Legitimate correspondence for {task['student_id']}",
+                            payload_content=f"Legitimate correspondence for {task['student_id']}: {task['subject']}",
                             recipient_student_id=task['student_id']
                         )
                         if delivered:
