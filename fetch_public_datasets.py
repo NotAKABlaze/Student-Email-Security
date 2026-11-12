@@ -102,7 +102,7 @@ def build_real_benchmark_datasets(seed=42):
     # Source: Real corporate/organizational emails from Hugging Face (aeslc)
     # -------------------------------------------------------------------------
     print("\n[3/3] Fetching real benign emails (aeslc - Enron Email Subject & Body Dataset)...")
-    enron_ds = load_dataset("aeslc", split="test").shuffle(seed=seed).select(range(60))
+    enron_ds = load_dataset("Yale-LILY/aeslc", split="test").shuffle(seed=seed).select(range(60))
 
     real_benign = []
     for idx, row in enumerate(enron_ds, start=1):
