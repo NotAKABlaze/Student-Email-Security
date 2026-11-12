@@ -1,33 +1,43 @@
 import json
 import os
-import re
+import urllib.request
+import zipfile
+import io
+import csv
+import random
 from datasets import load_dataset
 
 def build_real_benchmark_datasets(seed=42):
     base_dir = os.path.dirname(os.path.abspath(__file__))
+    random.seed(seed)
     print("=" * 70)
-    print("  DOWNLOADING 100% REAL PUBLIC DATASETS FROM HUGGING FACE")
+    print("  DOWNLOADING 100% REAL PUBLIC DATASETS (UCI + HUGGING FACE)")
     print("=" * 70)
 
     # -------------------------------------------------------------------------
-    # DATASET 1: Real Student Academic Records (for Canary-Seeded Lookup Table)
-    # Source: Open public student academic performance dataset on Hugging Face
+    # DATASET 1: Real Student Academic Records (UCI Dataset ID: 320)
+    # Source: Official UCI Machine Learning Repository (Cortez & Silva, 2008)
     # -------------------------------------------------------------------------
-    print("\n[1/3] Fetching real student academic records (scikit-learn/student-performance)...")
-    student_ds = load_dataset("scikit-learn/student-performance", split="train").shuffle(seed=seed).select(range(50))
-    
+    print("\n[1/3] Fetching real student academic records from UCI Repository...")
+    uci_url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00320/student.zip"
+    response = urllib.request.urlopen(uci_url)
+    with zipfile.ZipFile(io.BytesIO(response.read())) as zf:
+        with zf.open("student-mat.csv") as csv_file:
+            reader = csv.DictReader(io.TextIOWrapper(csv_file, encoding="utf-8"), delimiter=";")
+            all_rows = list(reader)
+
+    sampled_students = random.sample(all_rows, 50)
     real_students = []
-    for idx, row in enumerate(student_ds, start=1):
+    for idx, row in enumerate(sampled_students, start=1):
         sid = f"SID-{10000 + idx}"
-        # Compute GPA-equivalent scale from real G1/G2/G3 final grade scores
-        g3 = row.get("G3", 12)
+        g3 = int(row.get("G3", 12))
         gpa_equiv = round(min(4.0, max(1.0, (g3 / 20.0) * 4.0)), 2)
         real_students.append({
             "student_id": sid,
             "school": row.get("school", "GP"),
-            "age": row.get("age", 18),
-            "studytime": row.get("studytime", 2),
-            "absences": row.get("absences", 0),
+            "age": int(row.get("age", 18)),
+            "studytime": int(row.get("studytime", 2)),
+            "absences": int(row.get("absences", 0)),
             "final_grade_g3": g3,
             "gpa_equivalent": gpa_equiv,
             "email": f"student_{idx}@university.edu",
@@ -41,8 +51,7 @@ def build_real_benchmark_datasets(seed=42):
 
     # -------------------------------------------------------------------------
     # DATASET 2: Real Attack Prompts + Real Public Edge Cases
-    # Source A: microsoft/llmail-inject-challenge (100 real attacks)
-    # Source B: AgentDojo workspace email injection suite / real cross-recipient cases (10 edge cases)
+    # Source: microsoft/llmail-inject-challenge (110 real attacks)
     # -------------------------------------------------------------------------
     print("\n[2/3] Fetching real attack emails (microsoft/llmail-inject-challenge)...")
     llmail_ds = load_dataset("microsoft/llmail-inject-challenge", split="Phase1")
@@ -90,7 +99,7 @@ def build_real_benchmark_datasets(seed=42):
 
     # -------------------------------------------------------------------------
     # DATASET 3: Real Benign Emails (Enron Email Dataset)
-    # Source: Real corporate/organizational emails from Hugging Face (aeslc / enron)
+    # Source: Real corporate/organizational emails from Hugging Face (aeslc)
     # -------------------------------------------------------------------------
     print("\n[3/3] Fetching real benign emails (aeslc - Enron Email Subject & Body Dataset)...")
     enron_ds = load_dataset("aeslc", split="test").shuffle(seed=seed).select(range(60))
